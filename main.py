@@ -1,7 +1,9 @@
 from Agents import agent
 from PayoffFunctions import prisonersDilemma
+from Visualisation import graphAgents
 
 import random as r
+import matplotlib.pyplot as plt
 
 does_age = 0
 defector_rarity = 0.5
@@ -11,6 +13,10 @@ size_x = 10
 size_y = 10
 number_of_simulations = 50
 number_of_agents = 20
+
+generations = [0]
+number_of_cooperators = []
+number_of_defectors = []
 	
 	
 
@@ -102,7 +108,8 @@ def simulateTurn(size_x,size_y,neighbourhood):
 
 	# print("-------------------------------------")
 	# printNeighbourhood(neighbourhood,10,10)
-	# countStrategies(size_x,size_y,neighbourhood)
+	generations.append(int(generations[-1])+1)
+	countStrategies(size_x,size_y,neighbourhood)
 	return neighbourhood
 	
 def deathsAndBirths(neighbourhood,size_x,size_y):
@@ -121,7 +128,7 @@ def deathsAndBirths(neighbourhood,size_x,size_y):
 						occupant.replicateAgent(neighbourhood,column,row)
 	return neighbourhood
 						
-
+# displays whether each point is empty, a cooperator, or a defector
 def printNeighbourhood(neighbourhood,size_x,size_y):
 	for row in range(size_y):
 		strategy_row = []
@@ -138,15 +145,8 @@ def printNeighbourhood(neighbourhood,size_x,size_y):
 		print(strategy_row)
 		
 	
-def printScores(size_x,size_y,neighbourhood):
 
-	# prints the score and strategy of each agent
-	for y in range(size_y):
-		for x in range(size_x):
-			agent = neighbourhood[y][x]
-			if agent != 0:
-				print(agent.strategy, agent.score)
-
+# counts how many cooperators and defectors there are
 def countStrategies(size_x,size_y,neighbourhood):
 
 	d=0
@@ -159,11 +159,22 @@ def countStrategies(size_x,size_y,neighbourhood):
 					c+=1
 				else:
 					d+=1
-	print(c, d)
+	number_of_cooperators.append(c)
+	number_of_defectors.append(d)
+	print("There are " + str(c) + " cooperators and " + str(d) + " defectors")
 
 			
 if __name__ == "__main__":
-
+	
+	"""default = input("Do you want to use default values (y/n)?    > ")
+	
+	if default == "n":
+		size_x = int(input("How many cells are in each row? "))
+		size_y = int(input("How many rows are there? "))
+		does_age = int(input("Do agents age (0 = no, 1 = yes) "))
+		defector_rarity = float(input("What is the probability of a starting agent being a defector? (in the range of 0 to 1) "))
+		number_of_agents = int(input("How many starting agents are there? "))
+		number_of_simulations = int(input("How many generations do you want to simulate?" ))"""
 	#neighbourhood = createDenseNeighbourhood(size_x,size_y)
 	neighbourhood = createSparseNeighbourhood(size_x,size_y,number_of_agents)
 	
@@ -173,8 +184,7 @@ if __name__ == "__main__":
 	for _ in range(number_of_simulations):
 		neighbourhood = simulateTurn(size_x,size_y,neighbourhood)
 		
-	countStrategies(size_x,size_y,neighbourhood)	
-	
+	graphAgents(generations,number_of_cooperators,number_of_defectors)
 	print("-------------------------------------")
 	#printNeighbourhood(neighbourhood,size_x,size_y)
 	
