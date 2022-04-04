@@ -3,8 +3,16 @@ from PayoffFunctions import prisonersDilemma
 
 import random as r
 
+does_age = 0
 defector_rarity = 0.5
 sight = 1
+
+size_x = 10
+size_y = 10
+number_of_simulations = 50
+number_of_agents = 20
+	
+	
 
 # creates a grid where some coordinate points are not occupied at the start of the simulation
 def createSparseNeighbourhood(size_x,size_y,no_of_agents):
@@ -51,7 +59,8 @@ def createDenseNeighbourhood(size_x,size_y):
 			i+=1
 		neighbourhood.append(row)
 	return neighbourhood
-
+	
+# runs through each agent and has it play the dilemma with a random neighbour. if there are no such neighbours, it instead moves.
 def simulateTurn(size_x,size_y,neighbourhood):
 	for row in range(size_y):
 		for column in range(size_x):
@@ -59,7 +68,7 @@ def simulateTurn(size_x,size_y,neighbourhood):
 			if neighbourhood[row][column] != 0:
 				agent = neighbourhood[row][column]
 				
-				north = neighbourhood[(row+1)%size_x][column]
+				north = neighbourhood[(row+1)%size_y][column]
 				west = neighbourhood[row][(column-1)%size_x]
 				south = neighbourhood[(row-1)%size_y][column]
 				east = neighbourhood[row][(column+1)%size_x]
@@ -86,23 +95,26 @@ def simulateTurn(size_x,size_y,neighbourhood):
 					p1,p2 = prisonersDilemma(agent.strategy,opponent.strategy)
 					agent.score+=p1
 					opponent.score+=p2
+				
+				agent.age+=does_age
 
 	neighbourhood = deathsAndBirths(neighbourhood,size_x,size_y)
 
 	# print("-------------------------------------")
 	# printNeighbourhood(neighbourhood,10,10)
-	countStrategies(size_x,size_y,neighbourhood)
+	# countStrategies(size_x,size_y,neighbourhood)
 	return neighbourhood
 	
 def deathsAndBirths(neighbourhood,size_x,size_y):
 	death_threshold = -10
 	replicate_threshold = 10 
+	maximum_age = 5
 	
 	for row in range(size_y):
 		for column in range(size_x):
 			occupant = neighbourhood[row][column]
 			if occupant != 0:
-				if occupant.score < death_threshold:
+				if occupant.score < death_threshold or occupant.age > maximum_age:
 					neighbourhood[row][column] = 0
 				else:
 					if occupant.score > replicate_threshold:
@@ -114,7 +126,7 @@ def printNeighbourhood(neighbourhood,size_x,size_y):
 	for row in range(size_y):
 		strategy_row = []
 		for column in range(size_x):
-			point = neighbourhood[column][row]
+			point = neighbourhood[row][column]
 			
 			if point == 0:
 				strategy_row.append("X")
@@ -152,16 +164,17 @@ def countStrategies(size_x,size_y,neighbourhood):
 			
 if __name__ == "__main__":
 
-	size_x = 10
-	size_y = 10
 	#neighbourhood = createDenseNeighbourhood(size_x,size_y)
-	neighbourhood = createSparseNeighbourhood(size_x,size_y,20)
+	neighbourhood = createSparseNeighbourhood(size_x,size_y,number_of_agents)
 	
-	printNeighbourhood(neighbourhood,size_x,size_y)
+	#printNeighbourhood(neighbourhood,size_x,size_y)
+	countStrategies(size_x,size_y,neighbourhood)
 	
-	for _ in range(10000):
+	for _ in range(number_of_simulations):
 		neighbourhood = simulateTurn(size_x,size_y,neighbourhood)
 		
+	countStrategies(size_x,size_y,neighbourhood)	
+	
 	print("-------------------------------------")
-	printNeighbourhood(neighbourhood,size_x,size_y)
+	#printNeighbourhood(neighbourhood,size_x,size_y)
 	
